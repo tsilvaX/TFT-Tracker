@@ -1,2 +1,5 @@
 local_api.json
 .env
+.idea/
+tempCodeRunnerFile.py
+example.json
