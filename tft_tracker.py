@@ -28,12 +28,13 @@ else:
         print(str(counter) + " / " + str(len(match_ids)))
         time.sleep(1.2)
         match_data = response.json() # Match data (everything under match_id)
+        if 'info' not in match_data:
+            print(f"Skipping: {match_data}")
+            continue
         data.append(match_data)
-    match_data = response.json()
-    print(response.status_code, match_data)
+
     with open("local_api.json", "w") as f:   
         json.dump(data, f)
-
 
 match_total = (len(data)) # Total number of matches
 placements = []
@@ -59,23 +60,22 @@ for match_data in data:
     placements.append(placement) # store my placement, go next game
 
 sorted_units = sorted(unit_counts.items(), key=lambda item: item[1], reverse = True)
-print(sorted_units)
 
-print("Average placement: " + str(sum(placements)/len(placements)))
+# Stats functions
+def get_stats():
+    # Top 4 rate
+    top_4 = 0
+    for placement in placements:
+        if(placement <= 4):
+            top_4 += 1
+    return (top_4/len(placements))*100
 
-# Top 4 rate
-top_4 = 0
-for placement in placements:
-    if(placement <= 4):
-        top_4 += 1
+def get_avg_placement():
+    # Average Placement
+    return sum(placements)/len(placements)
 
-print("Top 4 rate: " + str((top_4/len(placements))*100) + "%")
+def get_sorted_units():
+    return sorted_units
 
-# Placement Trend Visual
-plt.plot(placements, marker=".")
-plt.gca().invert_yaxis()
-plt.title("Performance Trend")
-plt.ylabel("Placement")
-plt.xlabel("Games (total = " + str(match_total) + ")")
-plt.xticks([])
-plt.show()
+def get_match_total():
+    return match_total

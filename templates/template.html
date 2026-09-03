@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TFT Tracker</title>
+</head>
+<body>
+    <h1>TFT Tracker</h1>
+    <h2 id="top4"></h2>
+    <h2 id="avg"></h2>
+
+    <script>
+        fetch('/api/stats')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('top4').innerText = 'Top 4 Rate: ' + data.top4_rate + '%';
+                document.getElementById('avg').innerText = 'Avg Placement: ' + data.avg_placement;
+            });
+    </script>
+</body>
+</html>
