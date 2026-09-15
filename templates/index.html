@@ -1,0 +1,2127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TFT Tracker</title>
+    <link rel="icon" href="/static/assets/tft_tracker_mark.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/redesign.css?v=20260915-tactician">
+</head>
+
+<body>
+    <section class="identity-gate" id="identityGate" aria-hidden="true" aria-modal="true" role="dialog" aria-labelledby="identityTitle">
+        <article class="identity-card">
+            <img src="/static/assets/tft_tracker_logo.svg" alt="TFT Tracker">
+            <h2 id="identityTitle">Open your matchroom</h2>
+            <p>Your Riot ID stays in this browser and brings you back to your own review desk.</p>
+            <form class="identity-form" id="identityForm">
+                <label>
+                    Riot ID
+                    <input id="identityInput" type="text" placeholder="GameName#TAG" autocomplete="username">
+                </label>
+                <button type="submit">Open dashboard</button>
+                <span class="identity-error" id="identityError">Use the format GameName#TAG.</span>
+            </form>
+        </article>
+    </section>
+
+    <main>
+        <header class="app-header">
+            <a class="brand" href="#" aria-label="TFT Tracker overview">
+                <img class="brand-logo" src="/static/assets/tft_tracker_logo.svg" alt="TFT Tracker">
+                <h1>TFT Tracker</h1>
+                <p class="subtitle">Your games, under review.</p>
+            </a>
+            <div class="header-rule" aria-hidden="true"></div>
+            <aside class="tactician-widget" aria-live="polite">
+                <div class="player-identity" id="playerIdentity">
+                    <strong>
+                        <span id="playerIdentityName">No player</span><span id="playerIdentityTag"></span><span class="player-score" id="playerScore" hidden>-</span>
+                    </strong>
+                </div>
+                <div class="tactician-stage" id="tacticianStage">
+                    <div class="tactician-figure" id="tacticianFigure" role="img" aria-label="Most played tactician">
+                        <img class="tactician-character" id="tacticianImage" src="/static/assets/default_tactician_spirit.png" alt="" loading="lazy" decoding="async">
+                    </div>
+                </div>
+            </aside>
+        </header>
+
+        <section class="control-strip" aria-label="Dataset controls">
+            <form class="toolbar" id="playerForm">
+                <label>
+                    Find a player
+                    <input id="riotIdInput" type="text" placeholder="GameName#TAG" autocomplete="username">
+                </label>
+                <button id="loadButton" type="submit">Load Player</button>
+            </form>
+            <div class="filters">
+                <label>
+                    Set
+                    <select id="setFilter">
+                        <option value="latest">Latest set</option>
+                    </select>
+                </label>
+                <label>
+                    Patch
+                    <select id="patchFilter">
+                        <option value="latest">Latest patch</option>
+                    </select>
+                </label>
+                <label>
+                    Games
+                    <select id="limitFilter">
+                        <option value="">All games</option>
+                        <option value="20">Last 20</option>
+                        <option value="50">Last 50</option>
+                        <option value="100">Last 100</option>
+                    </select>
+                </label>
+            </div>
+        </section>
+
+        <div class="status-deck">
+            <div class="scope-strip" id="dataScope"></div>
+            <p class="meta" id="meta"></p>
+            <p class="error" id="error"></p>
+        </div>
+
+        <nav class="tabs-nav" role="tablist" aria-label="Player analysis views">
+            <span class="tab-indicator" aria-hidden="true"></span>
+            <button class="tab-button active" type="button" role="tab" aria-selected="true" data-tab="overview">Overview</button>
+            <button class="tab-button" type="button" role="tab" aria-selected="false" data-tab="insights">Insights</button>
+            <button class="tab-button" type="button" role="tab" aria-selected="false" data-tab="units">Units</button>
+            <button class="tab-button" type="button" role="tab" aria-selected="false" data-tab="traits">Traits</button>
+            <button class="tab-button" type="button" role="tab" aria-selected="false" data-tab="comps">Comps</button>
+            <button class="tab-button" type="button" role="tab" aria-selected="false" data-tab="augments">Augments</button>
+            <button class="tab-button" type="button" role="tab" aria-selected="false" data-tab="builder">Builder</button>
+        </nav>
+
+        <div class="tab-panel active" id="overviewTab" role="tabpanel">
+            <section class="overview-layout">
+                <article class="panel quick-panel">
+                    <div class="panel-header">
+                        <h2>Set performance</h2>
+                        <span class="muted">At a glance</span>
+                    </div>
+                    <div class="quick-stats">
+                        <div class="quick-stat primary-stat">
+                            <span>Avg Place</span>
+                            <strong id="avgPlacement">-</strong>
+                        </div>
+                        <div class="quick-stat primary-stat">
+                            <span>Top 4</span>
+                            <strong id="top4Rate">-</strong>
+                        </div>
+                        <div class="quick-stat">
+                            <span>Matches</span>
+                            <strong id="matchTotal">-</strong>
+                        </div>
+                        <div class="quick-stat">
+                            <span>Last 20 Avg</span>
+                            <strong id="recentAvgPlacement">-</strong>
+                        </div>
+                        <div class="quick-stat">
+                            <span>Last 20 Wins</span>
+                            <strong id="recentWins">-</strong>
+                        </div>
+                        <div class="quick-stat">
+                            <span>Last 20 Top 4</span>
+                            <strong id="recentTop4">-</strong>
+                        </div>
+                        <div class="quick-stat">
+                            <span>Avg Level</span>
+                            <strong id="recentAvgLevel">-</strong>
+                        </div>
+                        <div class="quick-stat">
+                            <span>Avg Gold Left</span>
+                            <strong id="recentAvgGold">-</strong>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="panel recent-panel">
+                    <div class="panel-header">
+                        <h2>Twenty-game ledger</h2>
+                        <span class="muted">Newest on the left</span>
+                    </div>
+                    <div class="recent-grid" id="recentMatches"></div>
+                    <div class="tag-strip" id="playerTags"></div>
+                </article>
+            </section>
+
+            <section class="grid performance-grid">
+                <article class="panel trend-panel">
+                    <div class="panel-header">
+                        <h2>Placement momentum</h2>
+                        <span class="muted">Estimated from placements</span>
+                    </div>
+                    <canvas id="trendChart" width="900" height="320"></canvas>
+                </article>
+
+                <article class="panel breakdown-panel">
+                    <div class="panel-header">
+                        <h2>Placement Breakdown</h2>
+                    </div>
+                    <div class="bars" id="placementBreakdown"></div>
+                </article>
+            </section>
+
+            <section class="tables one-column">
+                <article class="panel match-log-panel">
+                    <div class="panel-header">
+                        <h2>Match notes</h2>
+                        <span class="muted">Traits, units, and economy</span>
+                    </div>
+                    <div class="recent-detail-list" id="recentDetails"></div>
+                </article>
+            </section>
+        </div>
+
+        <div class="tab-panel" id="insightsTab">
+            <article class="panel">
+                <div class="panel-header">
+                    <h2>Personal Insights</h2>
+                    <span class="muted">Observations from your games</span>
+                </div>
+                <div class="insight-grid" id="insightsGrid"></div>
+            </article>
+        </div>
+
+        <div class="tab-panel" id="unitsTab">
+            <section class="tables">
+                <article class="panel">
+                    <div class="panel-header">
+                        <h2>Most Played Units</h2>
+                    </div>
+                    <div id="mostPlayedUnits"></div>
+                </article>
+
+                <article class="panel">
+                    <div class="panel-header">
+                        <h2>Unit Performance</h2>
+                    </div>
+                    <div id="unitPerformance"></div>
+                </article>
+            </section>
+        </div>
+
+        <div class="tab-panel" id="traitsTab">
+            <section class="tables">
+                <article class="panel">
+                    <div class="panel-header">
+                        <h2>Most Played Traits</h2>
+                    </div>
+                    <div id="mostPlayedTraits"></div>
+                </article>
+
+                <article class="panel">
+                    <div class="panel-header">
+                        <h2>Trait Breakpoints</h2>
+                    </div>
+                    <div id="traitBreakpoints"></div>
+                </article>
+            </section>
+
+            <section class="tables one-column">
+                <article class="panel">
+                    <div class="panel-header">
+                        <h2>Trait Performance</h2>
+                    </div>
+                    <div id="traitPerformance"></div>
+                </article>
+            </section>
+        </div>
+
+        <div class="tab-panel" id="compsTab">
+            <section class="tables one-column">
+                <article class="panel">
+                    <div class="panel-header">
+                        <h2>TFTAcademy Comp History</h2>
+                        <span class="muted">Exact, -1, or -2 unit matches</span>
+                    </div>
+                    <div class="comp-controls">
+                        <label>
+                            Search
+                            <input id="academyCompSearch" type="text" placeholder="Dragon, Ahri, Primal">
+                        </label>
+                        <label>
+                            Tier
+                            <select id="academyTierFilter">
+                                <option value="">All tiers</option>
+                            </select>
+                        </label>
+                        <label>
+                            Matches
+                            <select id="academyMatchFilter">
+                                <option value="">All comps</option>
+                                <option value="played">Played only</option>
+                                <option value="exact">Exact match</option>
+                                <option value="near">Near match</option>
+                                <option value="unplayed">Not found</option>
+                            </select>
+                        </label>
+                        <label>
+                            Sort
+                            <select id="academySort">
+                                <option value="source">TFTAcademy order</option>
+                                <option value="games">Most played</option>
+                                <option value="avg">Best avg</option>
+                                <option value="top4">Best Top 4</option>
+                                <option value="wins">Best win rate</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div id="academyCompPerformance"></div>
+                </article>
+            </section>
+        </div>
+
+        <div class="tab-panel" id="augmentsTab">
+            <section class="tables one-column">
+                <article class="panel">
+                    <div class="panel-header">
+                        <h2>Augments</h2>
+                        <span class="muted">Riot data only</span>
+                    </div>
+                    <div id="augmentStats"></div>
+                </article>
+            </section>
+        </div>
+
+        <div class="tab-panel" id="builderTab">
+            <article class="panel">
+                <div class="panel-header">
+                    <h2>Builder Analysis</h2>
+                    <span class="muted">Played together in your match history</span>
+                </div>
+                <form class="analysis-form" id="analysisForm">
+                    <label class="wide-field">
+                        TFTAcademy Comp
+                        <select id="compSelect">
+                            <option value="">Custom selection</option>
+                        </select>
+                    </label>
+                    <label>
+                        Units
+                        <input id="unitsInput" type="text" placeholder="Kennen, Sentinel, Sivir">
+                    </label>
+                    <label>
+                        Traits
+                        <input id="traitsInput" type="text" placeholder="Juggernaut, Primal">
+                    </label>
+                    <div class="analysis-actions wide-field">
+                        <button id="analysisButton" type="submit">Analyze</button>
+                    </div>
+                </form>
+                <div id="analysisResults"></div>
+            </article>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script>
+        const RIOT_ID_STORAGE_KEY = "tft-tracker.riot-id";
+        const RIOT_ID_COOKIE_KEY = "tft_tracker_riot_id";
+        const identityGate = document.getElementById("identityGate");
+        const identityForm = document.getElementById("identityForm");
+        const identityInput = document.getElementById("identityInput");
+        const identityError = document.getElementById("identityError");
+        const playerForm = document.getElementById("playerForm");
+        const riotIdInput = document.getElementById("riotIdInput");
+        const loadButton = document.getElementById("loadButton");
+        const playerIdentityName = document.getElementById("playerIdentityName");
+        const playerIdentityTag = document.getElementById("playerIdentityTag");
+        const playerScore = document.getElementById("playerScore");
+        const tacticianStage = document.getElementById("tacticianStage");
+        const tacticianFigure = document.getElementById("tacticianFigure");
+        const tacticianImage = document.getElementById("tacticianImage");
+        const setFilter = document.getElementById("setFilter");
+        const patchFilter = document.getElementById("patchFilter");
+        const limitFilter = document.getElementById("limitFilter");
+        const compSelect = document.getElementById("compSelect");
+        const unitsInput = document.getElementById("unitsInput");
+        const traitsInput = document.getElementById("traitsInput");
+        const analysisForm = document.getElementById("analysisForm");
+        const analysisButton = document.getElementById("analysisButton");
+        const analysisResults = document.getElementById("analysisResults");
+        const academyCompPerformance = document.getElementById("academyCompPerformance");
+        const academyCompSearch = document.getElementById("academyCompSearch");
+        const academyTierFilter = document.getElementById("academyTierFilter");
+        const academyMatchFilter = document.getElementById("academyMatchFilter");
+        const academySort = document.getElementById("academySort");
+        const trendCanvas = document.getElementById("trendChart");
+        const meta = document.getElementById("meta");
+        const error = document.getElementById("error");
+        const dataScope = document.getElementById("dataScope");
+        const insightsGrid = document.getElementById("insightsGrid");
+        const tabsNav = document.querySelector(".tabs-nav");
+        const tabIndicator = document.querySelector(".tab-indicator");
+        let activeRiotId = "";
+        let lastRenderedStats = null;
+        let activeTrend = [];
+        let statsRequestInFlight = null;
+        let academyComps = [];
+        let academyPerformancePayload = null;
+        const ENABLE_TACTICIAN_MODELS = false;
+        const DEFAULT_TACTICIAN_SPRITE = "/static/assets/default_tactician_spirit.png";
+        const TACTICIAN_RENDER_ASSETS = {
+            "29021:9fb1e3ae-2294-4a89-869d-7933fec3fa36": "/static/assets/tacticians/urf-dowsie-3d.webp",
+            "29021": "/static/assets/tacticians/urf-dowsie-3d.webp",
+        };
+        const TACTICIAN_MOTION = {
+            "29021": "float",
+            "60001": "walk",
+        };
+        const TACTICIAN_FALLBACK_SPRITES = {
+            "60001": "/static/assets/chibi_malphite_fallback.png",
+            chibi_malphite: "/static/assets/chibi_malphite_fallback.png",
+            malphite: "/static/assets/chibi_malphite_fallback.png",
+        };
+
+        async function loadStats({ refresh = false } = {}) {
+            if (statsRequestInFlight) {
+                return statsRequestInFlight;
+            }
+
+            const params = new URLSearchParams();
+
+            if (!activeRiotId) {
+                showIdentityGate();
+                setLoading(false);
+                return;
+            }
+
+            if (activeRiotId) {
+                params.set("riot_id", activeRiotId);
+                params.set("match_count", "200");
+            }
+
+            params.set("set", setFilter.value || "latest");
+            params.set("patch", patchFilter.value || "latest");
+
+            if (limitFilter.value) {
+                params.set("limit", limitFilter.value);
+            }
+
+            if (refresh) {
+                params.set("refresh", "1");
+            }
+
+            setLoading(true);
+
+            statsRequestInFlight = (async () => {
+                const response = await fetch(`/api/stats?${params.toString()}`);
+                const stats = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(stats.error || "Could not load player stats.");
+                }
+
+                error.style.display = "none";
+                renderDashboard(stats);
+                lastRenderedStats = stats;
+                loadAcademyPerformance();
+            })();
+
+            try {
+                await statsRequestInFlight;
+            } catch (loadError) {
+                const fallbackStats = await loadCachedDefaultStats();
+
+                if (fallbackStats) {
+                    const canRecover = /Could not reach/i.test(loadError.message);
+                    error.textContent = canRecover
+                        ? "Live Riot data is unavailable right now. Showing the last cached snapshot."
+                        : loadError.message;
+                    error.style.display = "block";
+                    renderDashboard(fallbackStats);
+                    lastRenderedStats = fallbackStats;
+                    renderPlayerIdentity(activeRiotId || fallbackStats.player?.riot_id, fallbackStats.performance_score);
+                } else if (lastRenderedStats) {
+                    error.textContent = "Live Riot data is still loading or unavailable. Keeping the current dashboard instead of showing stale cache.";
+                    error.style.display = "block";
+                } else {
+                    error.textContent = loadError.message;
+                    error.style.display = "block";
+                    meta.textContent = "";
+                }
+            } finally {
+                statsRequestInFlight = null;
+                setLoading(false);
+            }
+        }
+
+        function renderDashboard(stats) {
+            renderSetOptions(stats.available_sets || stats.data_scope?.available_sets || [], stats.current_set, stats.latest_set);
+            renderPatchOptions(stats.available_patches || stats.data_scope?.patches || [], stats.current_patch, stats.latest_patch);
+            renderSummary(stats);
+            renderRecentMatches(stats.recent_matches || []);
+            renderRecentDetails(stats.recent_matches || []);
+            renderPlayerTags(stats.player_tags || []);
+            renderTraitBreakpoints(stats.trait_breakpoints || []);
+            renderDataScope(stats.data_scope);
+            renderInsights(stats.insights);
+            renderMeta(stats);
+            renderFavoriteTactician(stats.favorite_tactician);
+            renderTrend(stats.placement_trend || []);
+            renderPlacementBreakdown(stats.placement_breakdown || {});
+            renderCountTable("mostPlayedUnits", stats.most_played_units || []);
+            renderCountTable("mostPlayedTraits", stats.most_played_traits || []);
+            renderPerformanceTable("unitPerformance", stats.unit_performance || []);
+            renderPerformanceTable("traitPerformance", stats.trait_performance || []);
+            renderAugments(stats.augment_stats);
+            requestAnimationFrame(animateDashboardUpdate);
+        }
+
+        async function loadCachedDefaultStats() {
+            const fallbackParams = new URLSearchParams();
+            fallbackParams.set("match_count", "150");
+
+            fallbackParams.set("set", setFilter.value || "latest");
+            fallbackParams.set("patch", patchFilter.value || "latest");
+
+            if (limitFilter.value) {
+                fallbackParams.set("limit", limitFilter.value);
+            }
+
+            try {
+                const response = await fetch(`/api/stats?${fallbackParams.toString()}`);
+                const stats = await response.json();
+
+                if (!response.ok) {
+                    return null;
+                }
+
+                return stats;
+            } catch {
+                return null;
+            }
+        }
+
+        function renderSetOptions(sets, selectedSet, latestSet) {
+            const previous = setFilter.value || "latest";
+            setFilter.innerHTML = `<option value="latest">Latest set</option>`;
+
+            sets.forEach((setNumber) => {
+                const option = document.createElement("option");
+                option.value = String(setNumber);
+                option.textContent = `Set ${setNumber}`;
+                setFilter.appendChild(option);
+            });
+
+            const targetValue = previous === "latest" ? "latest" : String(selectedSet || latestSet || previous);
+            if ([...setFilter.options].some((option) => option.value === targetValue)) {
+                setFilter.value = targetValue;
+            }
+        }
+
+        function renderPatchOptions(patches, selectedPatch, latestPatch) {
+            const selected = patchFilter.value;
+            patchFilter.innerHTML = `
+                <option value="latest">Latest patch</option>
+                <option value="all">All patches in set</option>
+            `;
+
+            patches.forEach((patch) => {
+                const option = document.createElement("option");
+                option.value = patch;
+                option.textContent = `Patch ${patch}`;
+                patchFilter.appendChild(option);
+            });
+
+            const targetValue = selected === "latest" || selected === "all"
+                ? selected
+                : String(selectedPatch || latestPatch || selected || "latest");
+            if ([...patchFilter.options].some((option) => option.value === targetValue)) {
+                patchFilter.value = targetValue;
+            } else {
+                patchFilter.value = "latest";
+            }
+        }
+
+        function renderSummary(stats) {
+            document.getElementById("avgPlacement").textContent = stats.avg_placement ?? "-";
+            document.getElementById("top4Rate").textContent =
+                stats.top4_rate === null ? "-" : `${stats.top4_rate}%`;
+            document.getElementById("matchTotal").textContent = stats.match_total;
+            document.getElementById("recentAvgPlacement").textContent =
+                stats.recent_summary?.avg_placement ?? "-";
+            document.getElementById("recentWins").textContent =
+                stats.recent_summary?.wins ?? "-";
+            document.getElementById("recentTop4").textContent =
+                stats.recent_summary?.top4_rate === null || stats.recent_summary?.top4_rate === undefined
+                    ? "-"
+                    : `${stats.recent_summary.top4_rate}%`;
+            document.getElementById("recentAvgLevel").textContent =
+                stats.recent_summary?.avg_level ?? "-";
+            document.getElementById("recentAvgGold").textContent =
+                stats.recent_summary?.avg_gold_left ?? "-";
+        }
+
+        function renderRecentMatches(matches) {
+            const container = document.getElementById("recentMatches");
+
+            if (!matches.length) {
+                container.innerHTML = `<div class="empty">No recent matches</div>`;
+                return;
+            }
+
+            container.innerHTML = matches.map((match) => {
+                const placement = Number(match.placement);
+                const className = placementClass(placement);
+                const traits = (match.traits || [])
+                    .map((trait) => `${trait.num_units} ${trait.name}`)
+                    .join(", ");
+                const title = [
+                    `#${placement}`,
+                    match.patch ? `Patch ${match.patch}` : "",
+                    traits,
+                ].filter(Boolean).join(" - ");
+
+                return `<div class="placement-tile ${className}" tabindex="0" role="img" aria-label="${escapeHtml(title)}" data-tooltip="${escapeHtml(title)}">${placement}</div>`;
+            }).join("");
+        }
+
+        function renderPlayerTags(tags) {
+            const container = document.getElementById("playerTags");
+
+            if (!tags.length) {
+                container.innerHTML = "";
+                return;
+            }
+
+            container.innerHTML = tags.map((tag) => `
+                <span class="player-tag ${escapeHtml(tag.tone)}" title="${escapeHtml(tag.detail)}">
+                    ${escapeHtml(tag.label)}
+                </span>
+            `).join("");
+        }
+
+        function renderRecentDetails(matches) {
+            const container = document.getElementById("recentDetails");
+
+            if (!matches.length) {
+                container.innerHTML = `<div class="empty">No recent matches</div>`;
+                return;
+            }
+
+            container.innerHTML = matches.slice(0, 8).map((match) => {
+                const placement = Number(match.placement);
+                const className = placementClass(placement);
+                const traits = (match.traits || [])
+                    .slice(0, 4)
+                    .map((trait) => `${trait.num_units} ${trait.name}`)
+                    .join(" / ") || "No active traits";
+                const units = (match.units || []).slice(0, 8).join(", ") || "No units";
+                const metrics = [
+                    match.level ? `Lv ${match.level}` : null,
+                    match.gold_left !== null && match.gold_left !== undefined
+                        ? `${match.gold_left}g left`
+                        : null,
+                    match.total_damage_to_players > 0
+                        ? `${match.total_damage_to_players} dmg`
+                        : null,
+                    match.players_eliminated > 0
+                        ? `${match.players_eliminated} elim`
+                        : null,
+                ].filter(Boolean).join(" / ");
+
+                return `
+                    <div class="recent-detail">
+                        <span class="recent-place ${className}">${placement}</span>
+                        <span class="recent-main">
+                            <span class="recent-traits">${escapeHtml(traits)}</span>
+                            <span class="recent-units">${escapeHtml(units)}</span>
+                        </span>
+                        <span class="recent-metrics">${escapeHtml(metrics)}</span>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        function renderTraitBreakpoints(rows) {
+            const container = document.getElementById("traitBreakpoints");
+
+            if (!rows.length) {
+                container.innerHTML = `<div class="empty">No trait breakpoints</div>`;
+                return;
+            }
+
+            container.innerHTML = `<div class="trait-badge-list">${rows.map((row) => `
+                <div class="trait-badge-row">
+                    <span class="trait-hex ${escapeHtml(row.style_name)}">${row.num_units}</span>
+                    <span class="trait-copy">
+                        <strong>${escapeHtml(row.name)}</strong>
+                        <span>${escapeHtml(row.style_name)} tier - ${row.games} games</span>
+                    </span>
+                    <span class="trait-rate">${row.top4_rate}%</span>
+                </div>
+            `).join("")}</div>`;
+        }
+
+        function renderMeta(stats) {
+            const player = stats.player?.riot_id || "Cached player";
+            const set = stats.current_set ? `Set ${stats.current_set}` : "Unknown set";
+            const patch = stats.current_patch === "all"
+                ? "All patches"
+                : (stats.current_patch ? `Patch ${stats.current_patch}` : "Unknown patch");
+            renderPlayerIdentity(player, stats.performance_score);
+            meta.textContent = `${set} - ${patch}`;
+        }
+
+        function renderPlayerIdentity(riotId, performanceScore = null) {
+            const fallback = "No player";
+            const normalizedRiotId = riotId && riotId !== "Cached player" ? riotId : "";
+            const [name, tag] = normalizedRiotId.split("#");
+
+            playerIdentityName.textContent = name || fallback;
+            playerIdentityTag.textContent = tag ? `#${tag}` : "";
+
+            playerScore.className = "player-score";
+            if (performanceScore?.score !== undefined && performanceScore?.score !== null) {
+                playerScore.hidden = false;
+                playerScore.textContent = performanceScore.score;
+                playerScore.classList.add(`score-${performanceScore.tone || "steady"}`);
+                playerScore.title = `${performanceScore.label || "Score"} score from ${performanceScore.games || 0} set games`;
+            } else {
+                playerScore.hidden = true;
+                playerScore.textContent = "-";
+                playerScore.removeAttribute("title");
+            }
+        }
+
+        function renderDataScope(scope) {
+            if (!scope) {
+                dataScope.innerHTML = "";
+                return;
+            }
+
+            dataScope.innerHTML = `
+                <span class="scope-pill"><span>Dataset</span><strong>${scope.games} games</strong></span>
+                <span class="scope-pill"><span>Set</span><strong>${scope.current_set ?? "-"}</strong></span>
+                <span class="scope-pill"><span>Patch</span><strong>${escapeHtml(scope.current_patch === "all" ? "All" : (scope.current_patch || "-"))}</strong></span>
+                <span class="scope-pill"><span>Patches</span><strong>${scope.patch_count ?? 0}</strong></span>
+            `;
+        }
+
+        function renderInsights(insights) {
+            if (!insights) {
+                insightsGrid.innerHTML = `<div class="empty">No insights yet</div>`;
+                return;
+            }
+
+            insightsGrid.innerHTML = `
+                ${formInsightCard(insights)}
+                ${placementBandCard(insights.placement_bands)}
+                ${economyCard(insights.economy)}
+                ${patchSampleCard(insights.patch_samples)}
+                ${insightList("Best Unit Samples", insights.best_units)}
+                ${insightList("Review Unit Samples", insights.review_units)}
+                ${insightList("Best Trait Samples", insights.best_traits)}
+                ${insightList("Review Trait Samples", insights.review_traits)}
+                ${insightList("Most Repeated Trait Shells", insights.trait_shells, "traits")}
+            `;
+        }
+
+        function formInsightCard(insights) {
+            const streaks = insights.streaks || {};
+
+            return `
+                <section class="insight-card wide feature ${escapeHtml(insights.form?.tone || "neutral")}">
+                    <div>
+                        <h3>${escapeHtml(insights.form?.label || "Recent form")}</h3>
+                        <div class="form-readout">
+                            <div>
+                                <span>Overall Avg</span>
+                                <strong>${insights.form?.overall_avg ?? "-"}</strong>
+                            </div>
+                            <div>
+                                <span>Recent Avg</span>
+                                <strong>${insights.form?.recent_avg ?? "-"}</strong>
+                            </div>
+                            <div>
+                                <span>Delta</span>
+                                <strong>${formatDelta(insights.form?.delta)}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3>Streaks</h3>
+                        <div class="insight-list">
+                            <div class="insight-row">
+                                <strong>${escapeHtml(streaks.current_label || "Current")}</strong>
+                                <span>${streaks.current_length ?? 0} games</span>
+                            </div>
+                            <div class="insight-row">
+                                <strong>Best Top 4 run</strong>
+                                <span>${streaks.best_top4 ?? 0} games</span>
+                            </div>
+                            <div class="insight-row">
+                                <strong>Longest Bot 4 run</strong>
+                                <span>${streaks.worst_bot4 ?? 0} games</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        function placementBandCard(rows) {
+            if (!rows?.length) {
+                return insightEmptyCard("Placement Bands");
+            }
+
+            return `
+                <section class="insight-card">
+                    <h3>Placement Bands</h3>
+                    <div class="band-list">
+                        ${rows.map((row) => `
+                            <div class="band-row">
+                                <strong>${escapeHtml(row.label)}</strong>
+                                <div class="band-track">
+                                    <div class="band-fill ${row.label.includes("7th") || row.label.includes("5th") ? "warning" : ""}" style="width: ${row.rate}%"></div>
+                                </div>
+                                <span>${row.rate}%</span>
+                            </div>
+                        `).join("")}
+                    </div>
+                </section>
+            `;
+        }
+
+        function economyCard(economy) {
+            if (!economy) {
+                return insightEmptyCard("Level / Economy");
+            }
+
+            return `
+                <section class="insight-card">
+                    <h3>Level / Economy</h3>
+                    <div class="form-readout">
+                        <div>
+                            <span>Recent Level</span>
+                            <strong>${economy.recent_avg_level ?? "-"}</strong>
+                        </div>
+                        <div>
+                            <span>Recent Gold</span>
+                            <strong>${economy.recent_avg_gold_left ?? "-"}</strong>
+                        </div>
+                    </div>
+                    <div class="insight-list">
+                        <div class="insight-row">
+                            <strong>Overall avg level</strong>
+                            <span>${economy.overall_avg_level ?? "-"}</span>
+                        </div>
+                        <div class="insight-row">
+                            <strong>Overall gold left</strong>
+                            <span>${economy.overall_avg_gold_left ?? "-"}</span>
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        function patchSampleCard(rows) {
+            if (!rows?.length) {
+                return insightEmptyCard("Patch Samples");
+            }
+
+            return `
+                <section class="insight-card">
+                    <h3>Patch Samples</h3>
+                    <div class="insight-list">
+                        ${rows.map((row) => `
+                            <div class="insight-row">
+                                <strong>Patch ${escapeHtml(row.patch)}</strong>
+                                <span>${row.games} games</span>
+                                <span>${row.avg_placement} avg</span>
+                            </div>
+                        `).join("")}
+                    </div>
+                </section>
+            `;
+        }
+
+        function insightEmptyCard(title) {
+            return `
+                <section class="insight-card">
+                    <h3>${escapeHtml(title)}</h3>
+                    <div class="empty">Not enough games</div>
+                </section>
+            `;
+        }
+
+        function insightList(title, rows, type = "name") {
+            if (!rows?.length) {
+                return insightEmptyCard(title);
+            }
+
+            return `
+                <section class="insight-card">
+                    <h3>${escapeHtml(title)}</h3>
+                    <div class="insight-list">
+                        ${rows.map((row) => `
+                            <div class="insight-row">
+                                <strong>${escapeHtml(row[type] || row.name)}</strong>
+                                <span>${row.games} games</span>
+                                <span>${row.avg_placement} avg</span>
+                            </div>
+                        `).join("")}
+                    </div>
+                </section>
+            `;
+        }
+
+        function formatDelta(value) {
+            if (value === null || value === undefined) {
+                return "-";
+            }
+
+            return value > 0 ? `+${value}` : String(value);
+        }
+
+        function renderFavoriteTactician(tactician) {
+            const id = tactician?.id ? String(tactician.id) : "";
+            const exactIdentity = tactician?.content_id ? `${id}:${tactician.content_id}` : id;
+            const candidates = [
+                TACTICIAN_RENDER_ASSETS[exactIdentity],
+                TACTICIAN_RENDER_ASSETS[id],
+                tactician?.image_url,
+                DEFAULT_TACTICIAN_SPRITE,
+            ].filter((candidate, index, values) => candidate && values.indexOf(candidate) === index);
+            const label = tactician
+                ? `${tactician.name}, used in ${tactician.games} of the last ${tactician.sample_size} games`
+                : "Default Spirit tactician";
+            let candidateIndex = 0;
+
+            tacticianStage.dataset.motion = TACTICIAN_MOTION[id] || "float";
+            tacticianFigure.setAttribute("aria-label", label);
+            tacticianFigure.title = label;
+            tacticianStage.classList.remove("is-ready");
+
+            tacticianImage.onload = () => tacticianStage.classList.add("is-ready");
+            tacticianImage.onerror = () => {
+                candidateIndex += 1;
+                if (candidateIndex < candidates.length) {
+                    tacticianImage.src = candidates[candidateIndex];
+                }
+            };
+            tacticianImage.src = candidates[0] || DEFAULT_TACTICIAN_SPRITE;
+        }
+
+        const tacticianVisibilityObserver = new IntersectionObserver(([entry]) => {
+            tacticianStage.classList.toggle("is-offscreen", !entry.isIntersecting);
+        }, { threshold: 0.05 });
+
+        tacticianVisibilityObserver.observe(tacticianStage);
+        document.addEventListener("visibilitychange", () => {
+            tacticianStage.classList.toggle("is-page-hidden", document.hidden);
+        });
+
+        function getTacticianModelCandidates(tactician) {
+            if (!ENABLE_TACTICIAN_MODELS || !tactician) {
+                return [];
+            }
+
+            return getTacticianSlugs(tactician).map((slug) => `/static/models/tacticians/${slug}.glb`);
+        }
+
+        function getTacticianSlugs(tactician) {
+            return [
+                tactician.id,
+                tactician.name,
+                tactician.name?.replace(/^Chibi\s+/i, ""),
+            ]
+                .filter(Boolean)
+                .map((value) => String(value)
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, "_")
+                    .replace(/^_+|_+$/g, ""))
+                .filter(Boolean)
+                .filter((slug, index, values) => values.indexOf(slug) === index);
+        }
+
+        function getFallbackSpriteUrl(tactician) {
+            const slug = getTacticianSlugs(tactician)
+                .find((candidate) => TACTICIAN_FALLBACK_SPRITES[candidate]);
+
+            return slug ? TACTICIAN_FALLBACK_SPRITES[slug] : DEFAULT_TACTICIAN_SPRITE;
+        }
+
+        function createTacticianViewer(canvas) {
+            const state = {
+                ready: false,
+                loading: null,
+                renderer: null,
+                scene: null,
+                camera: null,
+                subject: null,
+                mixer: null,
+                clock: null,
+                THREE: null,
+            };
+
+            async function ensureThree() {
+                if (state.ready) {
+                    return state;
+                }
+
+                const [threeModule, loaderModule] = await Promise.all([
+                    import("three"),
+                    import("three/addons/loaders/GLTFLoader.js"),
+                ]);
+                const THREE = threeModule;
+
+                state.THREE = THREE;
+                state.GLTFLoader = loaderModule.GLTFLoader;
+                state.scene = new THREE.Scene();
+                state.camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+                state.camera.position.set(0, 1.05, 6.6);
+                state.clock = new THREE.Clock();
+                state.renderer = new THREE.WebGLRenderer({
+                    canvas,
+                    alpha: true,
+                    antialias: true,
+                    preserveDrawingBuffer: true,
+                    powerPreference: "high-performance",
+                });
+                state.renderer.setClearColor(0x000000, 0);
+                state.renderer.shadowMap.enabled = true;
+                state.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+                const hemiLight = new THREE.HemisphereLight(0xd7e5ff, 0x061429, 1.9);
+                state.scene.add(hemiLight);
+
+                const keyLight = new THREE.DirectionalLight(0xc9d8ff, 2.8);
+                keyLight.position.set(3, 4, 5);
+                keyLight.castShadow = true;
+                state.scene.add(keyLight);
+
+                const rimLight = new THREE.PointLight(0x7f6dff, 0.45, 7);
+                rimLight.position.set(-2.7, 1.6, 2.4);
+                state.scene.add(rimLight);
+
+                animate();
+                state.ready = true;
+                return state;
+            }
+
+            function resize() {
+                if (!state.renderer || !state.camera) {
+                    return;
+                }
+
+                const bounds = canvas.getBoundingClientRect();
+                const width = Math.max(Math.floor(bounds.width), 1);
+                const height = Math.max(Math.floor(bounds.height), 1);
+                const ratio = Math.min(window.devicePixelRatio || 1, 2);
+
+                if (canvas.width !== width * ratio || canvas.height !== height * ratio) {
+                    state.renderer.setPixelRatio(ratio);
+                    state.renderer.setSize(width, height, false);
+                    state.camera.aspect = width / height;
+                    state.camera.updateProjectionMatrix();
+                }
+            }
+
+            function clearSubject() {
+                if (!state.subject) {
+                    return;
+                }
+
+                state.scene.remove(state.subject);
+                state.subject.traverse?.((node) => {
+                    node.geometry?.dispose?.();
+                    if (Array.isArray(node.material)) {
+                        node.material.forEach((material) => {
+                            material.map?.dispose?.();
+                            material.dispose?.();
+                        });
+                    } else {
+                        node.material?.map?.dispose?.();
+                        node.material?.dispose?.();
+                    }
+                });
+                state.subject = null;
+                state.mixer = null;
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+
+                if (!state.renderer || !state.scene || !state.camera) {
+                    return;
+                }
+
+                resize();
+                const elapsed = state.clock.getElapsedTime();
+                const delta = state.clock.getDelta();
+
+                if (state.subject) {
+                    if (state.subject.userData.isSpriteFallback) {
+                        state.subject.rotation.y = Math.sin(elapsed * 1.4) * 0.18;
+                        state.subject.rotation.z = Math.sin(elapsed * 1.9) * 0.025;
+                        state.subject.scale.setScalar(1 + Math.sin(elapsed * 2.3) * 0.035);
+                    } else {
+                        state.subject.rotation.y += 0.006;
+                    }
+
+                    state.subject.position.y = Math.sin(elapsed * 2.2) * 0.045 + 0.06;
+                }
+
+                state.mixer?.update(delta);
+                state.renderer.render(state.scene, state.camera);
+            }
+
+            async function show(tactician) {
+                if (state.loading === tactician?.id) {
+                    return;
+                }
+
+                state.loading = tactician?.id || "placeholder";
+
+                try {
+                    await ensureThree();
+                    clearSubject();
+
+                    const loadedModel = await loadMappedModel(tactician);
+                    state.subject = loadedModel || createPlaceholderModel(tactician);
+                    state.subject.userData.baseName = tactician?.name || "Favorite tactician";
+                    state.scene.add(state.subject);
+                } catch {
+                    drawCanvasFallback(canvas, tactician);
+                }
+            }
+
+            async function loadMappedModel(tactician) {
+                const candidates = getTacticianModelCandidates(tactician);
+
+                for (const modelUrl of candidates) {
+                    if (!(await modelExists(modelUrl))) {
+                        continue;
+                    }
+
+                    const loader = new state.GLTFLoader();
+                    const gltf = await loader.loadAsync(modelUrl);
+                    const model = gltf.scene;
+                    model.traverse((node) => {
+                        if (node.isMesh) {
+                            node.castShadow = true;
+                            node.receiveShadow = true;
+                        }
+                    });
+                    fitModel(model);
+
+                    if (gltf.animations?.length) {
+                        state.mixer = new state.THREE.AnimationMixer(model);
+                        const idleClip = gltf.animations.find((clip) => /idle/i.test(clip.name)) || gltf.animations[0];
+                        state.mixer.clipAction(idleClip).play();
+                    }
+
+                    return model;
+                }
+
+                return null;
+            }
+
+            async function modelExists(url) {
+                try {
+                    const response = await fetch(url, { method: "HEAD", cache: "no-store" });
+                    return response.ok;
+                } catch {
+                    return false;
+                }
+            }
+
+            function fitModel(model) {
+                const THREE = state.THREE;
+                const box = new THREE.Box3().setFromObject(model);
+                const size = box.getSize(new THREE.Vector3());
+                const center = box.getCenter(new THREE.Vector3());
+                const maxAxis = Math.max(size.x, size.y, size.z) || 1;
+                const scale = 2.5 / maxAxis;
+
+                model.position.sub(center);
+                model.scale.setScalar(scale);
+            }
+
+            function createPlaceholderModel(tactician) {
+                const THREE = state.THREE;
+                const group = new THREE.Group();
+
+                if (getTacticianSlugs(tactician).some((slug) => slug.includes("malphite"))) {
+                    buildMalphiteFallback(group);
+                } else {
+                    buildSpiritFallback(group);
+                }
+
+                group.userData.isSpriteFallback = true;
+                group.userData.source = tactician?.name || "Default spirit tactician";
+                return group;
+            }
+
+            function makeMaterial(color, roughness = 0.72, metalness = 0.02) {
+                return new state.THREE.MeshStandardMaterial({
+                    color,
+                    roughness,
+                    metalness,
+                });
+            }
+
+            function addMesh(group, geometry, material, position, scale = [1, 1, 1], rotation = [0, 0, 0]) {
+                const mesh = new state.THREE.Mesh(geometry, material);
+                mesh.position.set(...position);
+                mesh.scale.set(...scale);
+                mesh.rotation.set(...rotation);
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                group.add(mesh);
+                return mesh;
+            }
+
+            function buildSpiritFallback(group) {
+                const THREE = state.THREE;
+                const bodyMaterial = makeMaterial(0x117ac9, 0.64, 0.01);
+                const highlightMaterial = makeMaterial(0x1e9ddb, 0.62, 0.01);
+                const eyeMaterial = makeMaterial(0xf7fbff, 0.34, 0);
+
+                addMesh(group, new THREE.SphereGeometry(0.9, 36, 28), bodyMaterial, [0, -0.05, 0], [1.05, 0.92, 0.78]);
+                addMesh(group, new THREE.ConeGeometry(0.45, 0.95, 36), bodyMaterial, [0, 0.74, 0], [0.88, 1, 0.72]);
+                addMesh(group, new THREE.SphereGeometry(0.34, 24, 18), highlightMaterial, [-0.7, 0.02, 0], [1.35, 0.55, 0.45], [0, 0, 0.36]);
+                addMesh(group, new THREE.SphereGeometry(0.34, 24, 18), highlightMaterial, [0.7, 0.02, 0], [1.35, 0.55, 0.45], [0, 0, -0.36]);
+                addMesh(group, new THREE.SphereGeometry(0.16, 20, 16), eyeMaterial, [-0.28, 0.08, 0.74], [0.78, 1.22, 0.18]);
+                addMesh(group, new THREE.SphereGeometry(0.16, 20, 16), eyeMaterial, [0.28, 0.08, 0.74], [0.78, 1.22, 0.18]);
+                group.scale.setScalar(1.04);
+                group.position.y = -0.16;
+            }
+
+            function buildMalphiteFallback(group) {
+                const THREE = state.THREE;
+                const rockMaterial = makeMaterial(0x82695f, 0.86, 0);
+                const darkRockMaterial = makeMaterial(0x5c4b45, 0.9, 0);
+                const glowMaterial = new THREE.MeshBasicMaterial({ color: 0x82ff32 });
+
+                addMesh(group, new THREE.IcosahedronGeometry(0.72, 1), rockMaterial, [0, 0.08, 0], [1.05, 1.25, 0.76]);
+                addMesh(group, new THREE.IcosahedronGeometry(0.42, 1), darkRockMaterial, [0, 0.86, 0], [1.25, 0.82, 0.72]);
+                addMesh(group, new THREE.IcosahedronGeometry(0.34, 1), rockMaterial, [-0.72, 0.22, 0], [0.78, 1.08, 0.65], [0, 0, -0.4]);
+                addMesh(group, new THREE.IcosahedronGeometry(0.34, 1), rockMaterial, [0.72, 0.22, 0], [0.78, 1.08, 0.65], [0, 0, 0.4]);
+                addMesh(group, new THREE.IcosahedronGeometry(0.3, 1), darkRockMaterial, [-0.34, -0.86, 0], [0.72, 0.9, 0.58]);
+                addMesh(group, new THREE.IcosahedronGeometry(0.3, 1), darkRockMaterial, [0.34, -0.86, 0], [0.72, 0.9, 0.58]);
+                addMesh(group, new THREE.SphereGeometry(0.06, 12, 8), glowMaterial, [-0.18, 0.93, 0.36], [1.9, 0.72, 0.18]);
+                addMesh(group, new THREE.SphereGeometry(0.06, 12, 8), glowMaterial, [0.18, 0.93, 0.36], [1.9, 0.72, 0.18]);
+                addMesh(group, new THREE.BoxGeometry(0.45, 0.08, 0.04), glowMaterial, [0, 0.74, 0.43], [1, 1, 1]);
+                group.scale.setScalar(0.96);
+                group.position.y = -0.18;
+            }
+
+            return { show };
+        }
+
+        function drawCanvasFallback(canvas, tactician) {
+            const context = canvas.getContext("2d");
+            const bounds = canvas.getBoundingClientRect();
+            const ratio = Math.min(window.devicePixelRatio || 1, 2);
+            const width = Math.max(Math.floor(bounds.width), 1);
+            const height = Math.max(Math.floor(bounds.height), 1);
+
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            context.scale(ratio, ratio);
+            context.clearRect(0, 0, width, height);
+            context.save();
+            context.translate(width / 2, height / 2 + 6);
+
+            if (tactician?.name?.toLowerCase().includes("malphite")) {
+                context.fillStyle = "#82695f";
+                context.beginPath();
+                context.moveTo(-34, -58);
+                context.lineTo(0, -82);
+                context.lineTo(35, -56);
+                context.lineTo(48, 1);
+                context.lineTo(24, 62);
+                context.lineTo(-24, 62);
+                context.lineTo(-48, 1);
+                context.closePath();
+                context.fill();
+                context.fillStyle = "#5c4b45";
+                context.fillRect(-44, -3, 22, 58);
+                context.fillRect(22, -3, 22, 58);
+                context.fillRect(-27, 45, 18, 34);
+                context.fillRect(9, 45, 18, 34);
+                context.fillStyle = "#82ff32";
+                context.fillRect(-22, -42, 15, 6);
+                context.fillRect(7, -42, 15, 6);
+                context.fillRect(-14, -24, 28, 5);
+            } else {
+                context.fillStyle = "#117ac9";
+                context.beginPath();
+                context.moveTo(0, -90);
+                context.bezierCurveTo(39, -56, 65, -22, 60, 18);
+                context.bezierCurveTo(55, 62, 27, 82, 0, 82);
+                context.bezierCurveTo(-27, 82, -55, 62, -60, 18);
+                context.bezierCurveTo(-65, -22, -39, -56, 0, -90);
+                context.fill();
+                context.fillStyle = "#1e9ddb";
+                context.beginPath();
+                context.ellipse(-49, 0, 18, 46, -0.74, 0, Math.PI * 2);
+                context.ellipse(49, 0, 18, 46, 0.74, 0, Math.PI * 2);
+                context.fill();
+                context.fillStyle = "#f7fbff";
+                context.beginPath();
+                context.ellipse(-18, 7, 10, 16, -0.12, 0, Math.PI * 2);
+                context.ellipse(18, 7, 10, 16, 0.12, 0, Math.PI * 2);
+                context.fill();
+            }
+
+            context.restore();
+        }
+
+        function renderTrend(trend, hoveredIndex = null) {
+            activeTrend = trend;
+            const bounds = trendCanvas.getBoundingClientRect();
+            const targetWidth = Math.max(Math.round(bounds.width), 300);
+            const targetHeight = Math.max(Math.round(bounds.height), 240);
+            if (trendCanvas.width !== targetWidth || trendCanvas.height !== targetHeight) {
+                trendCanvas.width = targetWidth;
+                trendCanvas.height = targetHeight;
+            }
+            const context = trendCanvas.getContext("2d");
+            const width = trendCanvas.width;
+            const height = trendCanvas.height;
+            const paddingX = width < 520 ? 38 : 46;
+            const paddingY = 34;
+
+            context.clearRect(0, 0, width, height);
+            const chartWidth = width - paddingX * 2;
+            const chartHeight = height - paddingY * 2;
+
+            context.fillStyle = "#0a1019";
+            context.fillRect(0, 0, width, height);
+
+            context.strokeStyle = "rgba(197, 211, 228, 0.13)";
+            context.lineWidth = 1;
+            context.font = "500 12px Outfit, Segoe UI, sans-serif";
+            context.fillStyle = "#9ba8b8";
+
+            for (let index = 0; index <= 4; index += 1) {
+                const y = paddingY + (index / 4) * chartHeight;
+                context.beginPath();
+                context.moveTo(paddingX, y);
+                context.lineTo(width - paddingX, y);
+                context.stroke();
+            }
+
+            context.strokeStyle = "rgba(136, 115, 238, 0.38)";
+            context.setLineDash([5, 6]);
+            context.beginPath();
+            context.moveTo(paddingX, paddingY + chartHeight / 2);
+            context.lineTo(width - paddingX, paddingY + chartHeight / 2);
+            context.stroke();
+            context.setLineDash([]);
+
+            const yLabels = ["Hot", "Top 4", "Even", "Bot 4", "Cold"];
+            yLabels.forEach((label, index) => {
+                const y = paddingY + (index / 4) * chartHeight;
+                context.fillStyle = index <= 1 ? "#80a9ff" : index === 2 ? "#9ba8b8" : "#d77980";
+                context.fillText(label, 8, y + 4);
+            });
+
+            if (!trend.length) {
+                context.fillStyle = "#9ba8b8";
+                context.fillText("No matches found", width / 2 - 46, height / 2);
+                return;
+            }
+
+            let momentum = 0;
+            const reversed = [...trend].reverse();
+            const series = reversed.map((game) => {
+                const placement = Number(game.placement);
+                const delta = placement === 1 ? 42
+                    : placement === 2 ? 30
+                    : placement === 3 ? 18
+                    : placement === 4 ? 8
+                    : placement === 5 ? -8
+                    : placement === 6 ? -18
+                    : placement === 7 ? -30
+                    : -42;
+                momentum += delta;
+                return { ...game, placement, momentum };
+            });
+            const values = series.map((item) => item.momentum);
+            const minValue = Math.min(...values, -30);
+            const maxValue = Math.max(...values, 30);
+            const range = Math.max(maxValue - minValue, 1);
+
+            const points = series.map((game, index) => ({
+                x: paddingX + (index / Math.max(series.length - 1, 1)) * chartWidth,
+                y: paddingY + ((maxValue - game.momentum) / range) * chartHeight,
+                placement: game.placement,
+                momentum: game.momentum,
+            }));
+
+            context.beginPath();
+            points.forEach((point, index) => {
+                if (index === 0) {
+                    context.moveTo(point.x, point.y);
+                } else {
+                    context.lineTo(point.x, point.y);
+                }
+            });
+            context.lineTo(points[points.length - 1].x, height - paddingY);
+            context.lineTo(points[0].x, height - paddingY);
+            context.closePath();
+            context.fillStyle = "rgba(93, 130, 239, 0.08)";
+            context.fill();
+
+            context.strokeStyle = "#5d82ef";
+            context.lineWidth = 2.5;
+            context.lineJoin = "round";
+            context.lineCap = "round";
+            context.beginPath();
+
+            points.forEach((point, index) => {
+                if (index === 0) {
+                    context.moveTo(point.x, point.y);
+                } else {
+                    context.lineTo(point.x, point.y);
+                }
+            });
+
+            context.stroke();
+
+            points.forEach((point, index) => {
+                if (index % Math.ceil(points.length / 18) !== 0 && index !== points.length - 1) {
+                    return;
+                }
+
+                context.fillStyle = "#5d82ef";
+                context.strokeStyle = "#0a1019";
+                context.lineWidth = 2.5;
+                context.beginPath();
+                context.arc(point.x, point.y, 4, 0, Math.PI * 2);
+                context.fill();
+                context.stroke();
+            });
+
+            const latest = points[points.length - 1];
+            context.fillStyle = "#f0ede5";
+            context.font = "700 16px Outfit, Segoe UI, sans-serif";
+            context.fillText(`${latest.momentum >= 0 ? "+" : ""}${latest.momentum}`, width - paddingX - 44, paddingY - 10);
+
+            if (Number.isInteger(hoveredIndex) && points[hoveredIndex]) {
+                const focus = points[hoveredIndex];
+                const tooltipWidth = 132;
+                const tooltipHeight = 52;
+                const tooltipX = Math.min(Math.max(focus.x - tooltipWidth / 2, paddingX), width - paddingX - tooltipWidth);
+                const tooltipY = focus.y > height / 2 ? focus.y - 68 : focus.y + 16;
+
+                context.strokeStyle = "rgba(240, 237, 229, 0.4)";
+                context.setLineDash([3, 5]);
+                context.beginPath();
+                context.moveTo(focus.x, paddingY);
+                context.lineTo(focus.x, height - paddingY);
+                context.stroke();
+                context.setLineDash([]);
+
+                context.fillStyle = "#f0ede5";
+                context.beginPath();
+                context.arc(focus.x, focus.y, 6, 0, Math.PI * 2);
+                context.fill();
+                context.strokeStyle = "#5d82ef";
+                context.lineWidth = 3;
+                context.stroke();
+
+                context.fillStyle = "#f0ede5";
+                context.fillRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight);
+                context.fillStyle = "#060a10";
+                context.font = "700 13px Outfit, Segoe UI, sans-serif";
+                context.fillText(`Game ${hoveredIndex + 1} · #${focus.placement}`, tooltipX + 10, tooltipY + 20);
+                context.font = "500 11px Outfit, Segoe UI, sans-serif";
+                context.fillStyle = "#4d5662";
+                context.fillText(`Momentum ${focus.momentum >= 0 ? "+" : ""}${focus.momentum}`, tooltipX + 10, tooltipY + 38);
+            }
+        }
+
+        function renderPlacementBreakdown(breakdown) {
+            const container = document.getElementById("placementBreakdown");
+            const values = Object.values(breakdown);
+            const maxValue = Math.max(...values, 1);
+
+            container.innerHTML = Object.entries(breakdown).map(([place, count]) => {
+                const placement = Number(place);
+                const className = placementClass(placement);
+
+                return `
+                <div class="bar-row">
+                    <span>${place}${ordinalSuffix(Number(place))}</span>
+                    <div class="bar-track">
+                        <div class="bar-fill ${className}" style="width: ${(count / maxValue) * 100}%"></div>
+                    </div>
+                    <strong>${count}</strong>
+                </div>
+            `;
+            }).join("");
+        }
+
+        function renderCountTable(id, rows) {
+            const container = document.getElementById(id);
+
+            if (!rows.length) {
+                container.innerHTML = `<div class="empty">No data</div>`;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>Name</th><th>Games</th></tr>
+                        </thead>
+                        <tbody>
+                            ${rows.map((row) => `
+                                <tr>
+                                    <td>${escapeHtml(row.name)}</td>
+                                    <td>${row.games}</td>
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderPerformanceTable(id, rows, nameKey = "name") {
+            const container = document.getElementById(id);
+
+            if (!rows.length) {
+                container.innerHTML = `<div class="empty">No data</div>`;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>${nameKey === "traits" ? "Traits" : "Name"}</th>
+                                <th>Games</th>
+                                <th>Avg</th>
+                                <th>Top 4</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows.map((row) => `
+                                <tr>
+                                    <td>${escapeHtml(row[nameKey])}</td>
+                                    <td>${row.games}</td>
+                                    <td>${row.avg_placement}</td>
+                                    <td>${row.top4_rate}%</td>
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderAugments(augmentStats) {
+            const container = document.getElementById("augmentStats");
+
+            if (!augmentStats?.available) {
+                container.innerHTML = `<div class="notice">${escapeHtml(augmentStats?.message || "No augment data found.")}</div>`;
+                return;
+            }
+
+            renderPerformanceTable("augmentStats", augmentStats.performance);
+        }
+
+        function setLoading(isLoading) {
+            loadButton.disabled = isLoading;
+            loadButton.textContent = isLoading ? "Refreshing..." : "Load Player";
+            document.body.classList.toggle("is-loading", isLoading);
+            document.querySelector("main").setAttribute("aria-busy", String(isLoading));
+        }
+
+        function showIdentityGate() {
+            identityGate.classList.add("active");
+            identityGate.setAttribute("aria-hidden", "false");
+            requestAnimationFrame(() => identityInput.focus());
+        }
+
+        function hideIdentityGate() {
+            identityGate.classList.remove("active");
+            identityGate.setAttribute("aria-hidden", "true");
+            identityError.style.display = "none";
+        }
+
+        function isValidRiotId(value) {
+            return /^[^#]{2,16}#[A-Za-z0-9]{2,5}$/.test(value.trim());
+        }
+
+        function readSavedRiotId() {
+            const savedLocal = localStorage.getItem(RIOT_ID_STORAGE_KEY);
+
+            if (savedLocal) {
+                return savedLocal;
+            }
+
+            const savedCookie = document.cookie
+                .split("; ")
+                .find((item) => item.startsWith(`${RIOT_ID_COOKIE_KEY}=`));
+
+            return savedCookie ? decodeURIComponent(savedCookie.split("=").slice(1).join("=")) : "";
+        }
+
+        function saveRiotId(riotId) {
+            localStorage.setItem(RIOT_ID_STORAGE_KEY, riotId);
+            document.cookie = `${RIOT_ID_COOKIE_KEY}=${encodeURIComponent(riotId)}; max-age=31536000; path=/; SameSite=Lax`;
+        }
+
+        function activateRiotId(riotId, { refresh = false } = {}) {
+            const normalizedRiotId = riotId.trim();
+
+            if (!isValidRiotId(normalizedRiotId)) {
+                identityError.style.display = "inline";
+                return;
+            }
+
+            saveRiotId(normalizedRiotId);
+            activeRiotId = normalizedRiotId;
+            riotIdInput.value = "";
+            renderPlayerIdentity(normalizedRiotId);
+            setFilter.value = "latest";
+            patchFilter.value = "latest";
+            hideIdentityGate();
+            loadStats({ refresh });
+        }
+
+        async function loadAcademyComps() {
+            try {
+                const response = await fetch("/api/comps");
+                const payload = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(payload.error || "Could not load comps.");
+                }
+
+                academyComps = payload.comps || [];
+                compSelect.innerHTML = `<option value="">Custom selection</option>`;
+                academyComps.forEach((comp, index) => {
+                    const option = document.createElement("option");
+                    option.value = String(index);
+                    option.textContent = `${comp.tier} - ${comp.title}`;
+                    compSelect.appendChild(option);
+                });
+            } catch {
+                compSelect.innerHTML = `<option value="">TFTAcademy comps unavailable</option>`;
+            }
+        }
+
+        async function loadAcademyPerformance() {
+            if (!activeRiotId) {
+                academyCompPerformance.innerHTML = `<div class="empty">Choose a player first</div>`;
+                return;
+            }
+
+            const params = new URLSearchParams();
+            params.set("riot_id", activeRiotId);
+            params.set("match_count", "200");
+            params.set("set", setFilter.value || "latest");
+            params.set("patch", patchFilter.value || "latest");
+
+            if (limitFilter.value) {
+                params.set("limit", limitFilter.value);
+            }
+
+            academyCompPerformance.innerHTML = `<div class="empty">Matching TFTAcademy comps to your games...</div>`;
+
+            try {
+                const response = await fetch(`/api/academy-performance?${params.toString()}`);
+                const payload = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(payload.error || "Could not analyze TFTAcademy comps.");
+                }
+
+                academyPerformancePayload = payload;
+                renderAcademyPerformance();
+            } catch (performanceError) {
+                academyCompPerformance.innerHTML = `<div class="notice">${escapeHtml(performanceError.message)}</div>`;
+            }
+        }
+
+        function renderAcademyPerformance() {
+            const payload = academyPerformancePayload;
+            const rows = payload?.comps || [];
+
+            if (!rows.length) {
+                academyCompPerformance.innerHTML = `<div class="empty">No TFTAcademy comps found</div>`;
+                return;
+            }
+
+            renderAcademyTierOptions(rows);
+            const filteredRows = filterAcademyRows(rows);
+            const playedRows = rows.filter((row) => row.games > 0);
+            const scope = payload.data_scope;
+            const scopeText = scope
+                ? `${scope.games} games checked from ${scope.patch_count} patch${scope.patch_count === 1 ? "" : "es"}`
+                : "Personal match history";
+
+            academyCompPerformance.innerHTML = `
+                <div class="scope-strip">
+                    <span class="scope-pill"><span>Matched</span><strong>${playedRows.length} comps</strong></span>
+                    <span class="scope-pill"><span>Showing</span><strong>${filteredRows.length}</strong></span>
+                    <span class="scope-pill"><span>Source</span><strong>TFTAcademy</strong></span>
+                    <span class="scope-pill"><span>Rule</span><strong>All / -1 / -2 units</strong></span>
+                    <span class="scope-pill"><span>History</span><strong>${escapeHtml(scopeText)}</strong></span>
+                </div>
+                <div class="academy-comp-grid">
+                    ${filteredRows.length ? filteredRows.map(renderAcademyCompCard).join("") : `<div class="empty">No comps match those filters</div>`}
+                </div>
+            `;
+        }
+
+        function renderAcademyTierOptions(rows) {
+            const previous = academyTierFilter.value;
+            const tiers = [...new Set(rows.map((row) => row.tier).filter(Boolean))];
+            academyTierFilter.innerHTML = `<option value="">All tiers</option>`;
+            tiers.forEach((tier) => {
+                const option = document.createElement("option");
+                option.value = tier;
+                option.textContent = `Tier ${tier}`;
+                academyTierFilter.appendChild(option);
+            });
+
+            if ([...academyTierFilter.options].some((option) => option.value === previous)) {
+                academyTierFilter.value = previous;
+            }
+        }
+
+        function filterAcademyRows(rows) {
+            const query = academyCompSearch.value.trim().toLowerCase();
+            const tier = academyTierFilter.value;
+            const matchFilter = academyMatchFilter.value;
+
+            return [...rows]
+                .filter((row) => {
+                    const haystack = [
+                        row.title,
+                        row.tier,
+                        row.style,
+                        ...(row.units || []),
+                    ].join(" ").toLowerCase();
+
+                    if (query && !haystack.includes(query)) {
+                        return false;
+                    }
+
+                    if (tier && row.tier !== tier) {
+                        return false;
+                    }
+
+                    if (matchFilter === "played" && row.games === 0) {
+                        return false;
+                    }
+
+                    if (matchFilter === "exact" && row.exact_games === 0) {
+                        return false;
+                    }
+
+                    if (matchFilter === "near" && row.near_games === 0) {
+                        return false;
+                    }
+
+                    if (matchFilter === "unplayed" && row.games > 0) {
+                        return false;
+                    }
+
+                    return true;
+                })
+                .sort(academySortFunction());
+        }
+
+        function academySortFunction() {
+            const sort = academySort.value;
+            const tierOrder = { S: 0, A: 1, B: 2, C: 3, D: 4, X: 5, Unranked: 6 };
+
+            if (sort === "games") {
+                return (a, b) => b.games - a.games || valueOrMax(a.avg_placement) - valueOrMax(b.avg_placement);
+            }
+
+            if (sort === "avg") {
+                return (a, b) => valueOrMax(a.avg_placement) - valueOrMax(b.avg_placement) || b.games - a.games;
+            }
+
+            if (sort === "top4") {
+                return (a, b) => valueOrMin(b.top4_rate) - valueOrMin(a.top4_rate) || b.games - a.games;
+            }
+
+            if (sort === "wins") {
+                return (a, b) => valueOrMin(b.win_rate) - valueOrMin(a.win_rate) || b.games - a.games;
+            }
+
+            return (a, b) => {
+                const played = Number(b.games > 0) - Number(a.games > 0);
+                return played || (tierOrder[a.tier] ?? 9) - (tierOrder[b.tier] ?? 9) || b.games - a.games;
+            };
+        }
+
+        function valueOrMax(value) {
+            return value === null || value === undefined ? 99 : Number(value);
+        }
+
+        function valueOrMin(value) {
+            return value === null || value === undefined ? -1 : Number(value);
+        }
+
+        function renderAcademyCompCard(comp) {
+            const playedClass = comp.games > 0 ? "played" : "";
+            const tierClass = String(comp.tier || "unranked").toLowerCase();
+            const bestMatch = comp.best_match;
+            const missingUnits = bestMatch?.missing_units || [];
+            const units = comp.units || [];
+            const shownUnits = units.slice(0, 9);
+            const hiddenUnitCount = Math.max(units.length - shownUnits.length, 0);
+            const fitText = bestMatch
+                ? `${bestMatch.match_quality} (${bestMatch.matched_count}/${bestMatch.target_count})`
+                : "Not found";
+
+            return `
+                <article class="academy-comp-card ${playedClass}">
+                    <div class="comp-card-head">
+                        <div class="comp-title">
+                            <strong>${escapeHtml(comp.title || "Unnamed Comp")}</strong>
+                            <span>${escapeHtml(comp.style || "Comp")}</span>
+                        </div>
+                        <span class="tier-pill ${escapeHtml(tierClass)}">${escapeHtml(comp.tier || "-")}</span>
+                    </div>
+                    <div class="comp-card-stats">
+                        <div>
+                            <span>Games</span>
+                            <strong>${comp.games}</strong>
+                        </div>
+                        <div>
+                            <span>Avg</span>
+                            <strong>${comp.avg_placement ?? "-"}</strong>
+                        </div>
+                        <div>
+                            <span>Top 4</span>
+                            <strong>${comp.top4_rate === null ? "-" : `${comp.top4_rate}%`}</strong>
+                        </div>
+                        <div>
+                            <span>Wins</span>
+                            <strong>${comp.win_rate === null ? "-" : `${comp.win_rate}%`}</strong>
+                        </div>
+                    </div>
+                    <div class="comp-card-meta">
+                        <span class="fit-pill">${escapeHtml(fitText)}</span>
+                        <span>${comp.exact_games} exact / ${comp.near_games} near</span>
+                    </div>
+                    <div class="unit-pills">
+                        ${shownUnits.map((unit) => `
+                            <span class="unit-pill ${missingUnits.includes(unit) ? "missing" : ""}">${escapeHtml(unit)}</span>
+                        `).join("")}
+                        ${hiddenUnitCount ? `<span class="unit-pill">+${hiddenUnitCount}</span>` : ""}
+                    </div>
+                </article>
+            `;
+        }
+
+        async function analyzeSelection() {
+            const selectedComp = compSelect.value === "" ? null : academyComps[Number(compSelect.value)];
+            const params = new URLSearchParams();
+
+            params.set("riot_id", activeRiotId || riotIdInput.value.trim());
+            params.set("match_count", "200");
+            params.set("set", setFilter.value || "latest");
+            params.set("patch", patchFilter.value || "latest");
+
+            if (unitsInput.value.trim()) {
+                params.set("units", unitsInput.value.trim());
+            }
+
+            if (traitsInput.value.trim()) {
+                params.set("traits", traitsInput.value.trim());
+            }
+
+            if (selectedComp) {
+                params.set("comp_units", selectedComp.units.join(","));
+            }
+
+            analysisButton.disabled = true;
+            analysisButton.textContent = "Analyzing...";
+
+            try {
+                const response = await fetch(`/api/analysis?${params.toString()}`);
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || "Could not analyze selection.");
+                }
+
+                renderAnalysis(result, selectedComp);
+            } catch (analysisError) {
+                analysisResults.innerHTML = `<div class="notice">${escapeHtml(analysisError.message)}</div>`;
+            } finally {
+                analysisButton.disabled = false;
+                analysisButton.textContent = "Analyze";
+            }
+        }
+
+        function renderAnalysis(result, selectedComp) {
+            const compSummary = selectedComp
+                ? `<p class="muted">${escapeHtml(selectedComp.title)}: ${selectedComp.units.map(escapeHtml).join(", ")}</p>`
+                : "";
+
+            analysisResults.innerHTML = `
+                <section class="summary">
+                    <article class="stat">
+                        <span>Games Found</span>
+                        <strong>${result.games}</strong>
+                    </article>
+                    <article class="stat">
+                        <span>Average Placement</span>
+                        <strong>${result.avg_placement ?? "-"}</strong>
+                    </article>
+                    <article class="stat">
+                        <span>Win Rate</span>
+                        <strong>${result.win_rate === null ? "-" : `${result.win_rate}%`}</strong>
+                    </article>
+                </section>
+                ${compSummary}
+                <div class="bars">${Object.entries(result.placement_breakdown).map(([place, count]) => `
+                    <div class="bar-row">
+                        <span>${place}${ordinalSuffix(Number(place))}</span>
+                        <div class="bar-track">
+                            <div class="bar-fill ${placementClass(place)}" style="width: ${(count / Math.max(...Object.values(result.placement_breakdown), 1)) * 100}%"></div>
+                        </div>
+                        <strong>${count}</strong>
+                    </div>
+                `).join("")}</div>
+            `;
+        }
+
+        function ordinalSuffix(value) {
+            if (value === 1) return "st";
+            if (value === 2) return "nd";
+            if (value === 3) return "rd";
+            return "th";
+        }
+
+        function placementClass(value) {
+            const placement = Math.min(Math.max(Number(value) || 8, 1), 8);
+            return `place-${placement}`;
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function shouldReduceMotion() {
+            return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        }
+
+        function enhanceDashboardMotion() {
+            syncTabIndicator(document.querySelector(".tab-button.active"), true);
+        }
+
+        function animateDashboardUpdate() {
+            if (shouldReduceMotion()) {
+                return;
+            }
+
+            const elements = [
+                ...document.querySelectorAll(".tab-panel.active .quick-stat"),
+                ...document.querySelectorAll(".tab-panel.active .placement-tile"),
+                ...document.querySelectorAll(".tab-panel.active .bar-row"),
+                ...document.querySelectorAll(".tab-panel.active .recent-detail"),
+                ...document.querySelectorAll(".tab-panel.active .academy-comp-card"),
+                ...document.querySelectorAll(".tab-panel.active .insight-row"),
+            ].filter((element) => !element.dataset.motionSettled);
+
+            if (!elements.length) {
+                return;
+            }
+
+            elements.forEach((element) => {
+                element.dataset.motionSettled = "true";
+            });
+
+            if (window.gsap) {
+                window.gsap.fromTo(
+                    elements,
+                    { opacity: 0.78, y: 5 },
+                    { opacity: 1, y: 0, duration: 0.2, stagger: 0.012, ease: "power3.out", clearProps: "transform" }
+                );
+                return;
+            }
+
+            elements.forEach((element, index) => {
+                element.animate(
+                    [
+                        { opacity: 0.78, transform: "translateY(5px)" },
+                        { opacity: 1, transform: "translateY(0)" },
+                    ],
+                    { duration: 200, delay: index * 12, easing: "cubic-bezier(0.23, 1, 0.32, 1)" }
+                );
+            });
+        }
+
+        function syncTabIndicator(button, immediate = false) {
+            if (!button || !tabIndicator) return;
+            tabIndicator.style.transitionDuration = immediate ? "0ms" : "";
+            tabIndicator.style.width = `${button.offsetWidth}px`;
+            tabIndicator.style.transform = `translateX(${button.offsetLeft}px)`;
+            if (immediate) {
+                requestAnimationFrame(() => {
+                    tabIndicator.style.transitionDuration = "";
+                });
+            }
+        }
+
+        function activateTab(button) {
+            const nextPanel = document.getElementById(`${button.dataset.tab}Tab`);
+            const previousPanel = document.querySelector(".tab-panel.active");
+
+            if (!nextPanel || nextPanel === previousPanel) {
+                return;
+            }
+
+            const updateTabState = () => {
+                document.querySelectorAll(".tab-button").forEach((tab) => {
+                    tab.classList.remove("active");
+                    tab.setAttribute("aria-selected", "false");
+                });
+                document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.remove("active"));
+                button.classList.add("active");
+                button.setAttribute("aria-selected", "true");
+                nextPanel.classList.add("active");
+                syncTabIndicator(button);
+            };
+            updateTabState();
+
+            if (!shouldReduceMotion()) {
+                if (window.gsap) {
+                    window.gsap.fromTo(
+                        nextPanel,
+                        { opacity: 0.86, y: 8 },
+                        { opacity: 1, y: 0, duration: 0.2, ease: "power3.out", clearProps: "transform" }
+                    );
+                } else {
+                    nextPanel.animate(
+                        [
+                            { opacity: 0.86, transform: "translateY(8px)" },
+                            { opacity: 1, transform: "translateY(0)" },
+                        ],
+                        { duration: 200, easing: "cubic-bezier(0.23, 1, 0.32, 1)" }
+                    );
+                }
+            }
+
+            requestAnimationFrame(animateDashboardUpdate);
+        }
+
+        playerForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const nextRiotId = riotIdInput.value.trim();
+
+            if (!isValidRiotId(nextRiotId)) {
+                error.textContent = "Use the format GameName#TAG.";
+                error.style.display = "block";
+                return;
+            }
+
+            error.style.display = "none";
+            activateRiotId(nextRiotId, { refresh: true });
+        });
+
+        identityForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            activateRiotId(identityInput.value, { refresh: true });
+        });
+
+        setFilter.addEventListener("change", () => {
+            patchFilter.value = "latest";
+            loadStats();
+        });
+        patchFilter.addEventListener("change", () => loadStats());
+        limitFilter.addEventListener("change", () => loadStats());
+        academyCompSearch.addEventListener("input", () => renderAcademyPerformance());
+        academyTierFilter.addEventListener("change", () => renderAcademyPerformance());
+        academyMatchFilter.addEventListener("change", () => renderAcademyPerformance());
+        academySort.addEventListener("change", () => renderAcademyPerformance());
+        document.querySelectorAll(".tab-button").forEach((button) => {
+            button.addEventListener("click", () => activateTab(button));
+            button.addEventListener("keydown", (event) => {
+                if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+                const tabs = [...document.querySelectorAll(".tab-button")];
+                const currentIndex = tabs.indexOf(button);
+                const nextIndex = event.key === "Home"
+                    ? 0
+                    : event.key === "End"
+                        ? tabs.length - 1
+                        : (currentIndex + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+                event.preventDefault();
+                tabs[nextIndex].focus();
+                activateTab(tabs[nextIndex]);
+            });
+        });
+        trendCanvas.addEventListener("pointermove", (event) => {
+            if (!activeTrend.length) return;
+            const bounds = trendCanvas.getBoundingClientRect();
+            const chartX = ((event.clientX - bounds.left) / bounds.width) * trendCanvas.width;
+            const paddingX = trendCanvas.width < 520 ? 38 : 46;
+            const chartWidth = trendCanvas.width - paddingX * 2;
+            const index = Math.round(((chartX - paddingX) / chartWidth) * Math.max(activeTrend.length - 1, 1));
+            const boundedIndex = Math.min(Math.max(index, 0), activeTrend.length - 1);
+            renderTrend(activeTrend, boundedIndex);
+        });
+        trendCanvas.addEventListener("pointerleave", () => renderTrend(activeTrend));
+        window.addEventListener("resize", () => {
+            syncTabIndicator(document.querySelector(".tab-button.active"), true);
+            if (activeTrend.length) renderTrend(activeTrend);
+        });
+        compSelect.addEventListener("change", () => {
+            const selectedComp = compSelect.value === "" ? null : academyComps[Number(compSelect.value)];
+            unitsInput.value = selectedComp ? selectedComp.units.join(", ") : unitsInput.value;
+        });
+        analysisForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            analyzeSelection();
+        });
+
+        loadAcademyComps();
+        const savedRiotId = readSavedRiotId();
+
+        if (savedRiotId && isValidRiotId(savedRiotId)) {
+            activeRiotId = savedRiotId;
+            riotIdInput.value = "";
+            renderPlayerIdentity(savedRiotId);
+            loadStats();
+        } else {
+            loadCachedDefaultStats().then((stats) => {
+                if (stats) {
+                    renderDashboard(stats);
+                    lastRenderedStats = stats;
+                    meta.textContent = "Cached local player - enter a Riot ID to refresh.";
+                }
+            });
+            renderPlayerIdentity("");
+            showIdentityGate();
+        }
+
+        requestAnimationFrame(enhanceDashboardMotion);
+    </script>
+</body>
+
+</html>

@@ -3,3 +3,23 @@ local_api.json
 .idea/
 tempCodeRunnerFile.py
 example.json
+
+# Python build artifacts
+__pycache__/
+*.py[cod]
+
+# Local API data and generated caches
+cache/
+
+# Agent, browser-review, and external-tool state
+.agents/
+.codex/
+.playwright-mcp/
+.sf/
+.impeccable/review/
+sentry/
+
+# Local logs and OS metadata
+*.log
+.DS_Store
+Thumbs.db

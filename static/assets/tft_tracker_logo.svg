@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 78" role="img" aria-label="TFT Tracker">
+  <g fill="none" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M13 9h35l13 13v34L48 69H13L5 61V17l8-8Z" stroke="#F3F0E9" stroke-width="2"/>
+    <path d="M13 9h35l13 13" stroke="#8873EE" stroke-width="5"/>
+    <path d="M15 50 27 40l10 6 16-20" stroke="#8873EE" stroke-width="5"/>
+    <path d="m48 26 7-1-2 7" stroke="#8873EE" stroke-width="4"/>
+    <path d="M18 22h27M31.5 22v13" stroke="#F3F0E9" stroke-width="5"/>
+  </g>
+  <text x="84" y="43" fill="#F3F0E9" font-family="Outfit, Segoe UI, sans-serif" font-size="38" font-weight="700" letter-spacing="1">TFT</text>
+  <path d="M181 14v48" stroke="#343E4D" stroke-width="1"/>
+  <text x="200" y="35" fill="#F3F0E9" font-family="Outfit, Segoe UI, sans-serif" font-size="20" font-weight="600" letter-spacing="1.5">TRACKER</text>
+  <text x="201" y="54" fill="#9BA8B8" font-family="Outfit, Segoe UI, sans-serif" font-size="10" font-weight="500" letter-spacing="2.2">MATCH REVIEW</text>
+</svg>

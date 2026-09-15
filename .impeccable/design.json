@@ -1,0 +1,270 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-15T05:45:00-07:00",
+  "title": "Design System: TFT Tracker",
+  "extensions": {
+    "colorMeta": {
+      "ink-deep": {
+        "role": "neutral",
+        "displayName": "Ink Deep",
+        "canonical": "#060a10",
+        "tonalRamp": [
+          "#060a10",
+          "#0a1019",
+          "#101925",
+          "#182333",
+          "#303b4b",
+          "#647184",
+          "#a4afbd",
+          "#f3f0e9"
+        ]
+      },
+      "mineral-paper": {
+        "role": "neutral",
+        "displayName": "Mineral Paper",
+        "canonical": "#f0ede5",
+        "tonalRamp": [
+          "#1a1916",
+          "#35322c",
+          "#565149",
+          "#7b756b",
+          "#a39d93",
+          "#c6c1b8",
+          "#dedbd3",
+          "#f0ede5"
+        ]
+      },
+      "violet-selection": {
+        "role": "primary",
+        "displayName": "Violet Selection",
+        "canonical": "#8873ee",
+        "tonalRamp": [
+          "#20183f",
+          "#34275f",
+          "#493887",
+          "#5e4bbd",
+          "#7560d9",
+          "#8873ee",
+          "#b6a8f7",
+          "#eeeaff"
+        ]
+      },
+      "cobalt-data": {
+        "role": "secondary",
+        "displayName": "Cobalt Data",
+        "canonical": "#5d82ef",
+        "tonalRamp": [
+          "#111d3c",
+          "#1b2e5e",
+          "#294486",
+          "#3d61b8",
+          "#5d82ef",
+          "#82a1f4",
+          "#b2c5f9",
+          "#edf2ff"
+        ]
+      },
+      "amber-state": {
+        "role": "tertiary",
+        "displayName": "Amber State",
+        "canonical": "#e6b85c",
+        "tonalRamp": [
+          "#2c210d",
+          "#4d3917",
+          "#745522",
+          "#a27a35",
+          "#c89b49",
+          "#e6b85c",
+          "#f0d393",
+          "#fff5dc"
+        ]
+      },
+      "red-state": {
+        "role": "tertiary",
+        "displayName": "Red State",
+        "canonical": "#dc6372",
+        "tonalRamp": [
+          "#35131a",
+          "#58202a",
+          "#833846",
+          "#aa4c5b",
+          "#c6626c",
+          "#dc6372",
+          "#eba0a8",
+          "#fdecee"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "First-run identity heading only."
+      },
+      "metric": {
+        "displayName": "Metric",
+        "purpose": "Primary placement and Top 4 readouts."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Analytical band headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Controls, match detail, and explanatory states."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Form labels, captions, and compact metadata."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "press",
+        "value": "140ms cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Immediate button and control press feedback."
+      },
+      {
+        "name": "state",
+        "value": "160ms ease",
+        "purpose": "Color, border, focus, tooltip, and loading-state changes."
+      },
+      {
+        "name": "tab-layer",
+        "value": "200ms cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Sliding tab rule and shallow panel-layer transition."
+      },
+      {
+        "name": "data-arrival",
+        "value": "200ms power3.out",
+        "purpose": "Short stagger when newly retrieved rows replace prior data."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide-stack",
+        "value": "1100px"
+      },
+      {
+        "name": "mobile",
+        "value": "720px"
+      },
+      {
+        "name": "compact-mobile",
+        "value": "440px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Compact violet command for loading a player or running analysis.",
+      "html": "<button class=\"ds-button\">Load Player</button>",
+      "css": ".ds-button { height: 40px; border: 1px solid transparent; border-radius: 4px; background: var(--violet, #8873ee); color: #080b12; font: 750 15px Outfit, sans-serif; padding: 0 17px; transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1), background-color 160ms ease; } .ds-button:hover { background: #9b88ef; } .ds-button:focus-visible { outline: 3px solid rgba(136,115,238,.35); outline-offset: 2px; } .ds-button:active { transform: scale(.97); }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Native dark field used for Riot ID, filters, and analysis inputs.",
+      "html": "<label class=\"ds-label\">Riot ID<input class=\"ds-input\" placeholder=\"GameName#TAG\"></label>",
+      "css": ".ds-label { display: grid; gap: 6px; color: #c2cad4; font: 600 12px Outfit, sans-serif; } .ds-input { height: 40px; border: 1px solid rgba(197,211,228,.28); border-radius: 4px; background: #101925; color: #f3f0e9; caret-color: #8873ee; padding: 0 12px; transition: border-color 160ms ease, background-color 160ms ease, outline-color 160ms ease; } .ds-input:focus-visible { border-color: #8873ee; outline: 3px solid rgba(136,115,238,.2); background: #182333; }"
+    },
+    {
+      "name": "Tab Rail",
+      "kind": "nav",
+      "refersTo": "tab-active",
+      "description": "Text navigation with a moving selection rule.",
+      "html": "<nav class=\"ds-tabs\"><button class=\"ds-tab ds-active\">Overview</button><button class=\"ds-tab\">Insights</button><span class=\"ds-rule\"></span></nav>",
+      "css": ".ds-tabs { position: relative; display: flex; gap: 28px; border-bottom: 1px solid rgba(197,211,228,.28); background: #060a10; } .ds-tab { min-height: 58px; border: 0; background: transparent; color: #9ba8b8; font: 600 14px Outfit, sans-serif; } .ds-tab:hover,.ds-tab:focus-visible,.ds-tab.ds-active { color: #f3f0e9; } .ds-rule { position: absolute; bottom: -1px; left: 0; width: 64px; height: 3px; background: #8873ee; }"
+    },
+    {
+      "name": "Match Ledger",
+      "kind": "custom",
+      "refersTo": "match-ledger",
+      "description": "Signature mineral-paper surface with eight-placement outcome language.",
+      "html": "<section class=\"ds-ledger\"><h3>Twenty-game ledger</h3><div class=\"ds-places\"><span class=\"ds-place ds-first\">1</span><span class=\"ds-place ds-fourth\">4</span><span class=\"ds-place ds-sixth\">6</span><span class=\"ds-place ds-eighth\">8</span></div></section>",
+      "css": ".ds-ledger { background: #f0ede5; color: #060a10; padding: 30px; font-family: Outfit, sans-serif; } .ds-ledger h3 { margin: 0 0 20px; font-size: 20px; } .ds-places { display: flex; gap: 5px; } .ds-place { display: grid; width: 34px; height: 54px; place-items: center; border-radius: 2px; color: #fff; font-weight: 750; transition: transform 160ms cubic-bezier(0.23,1,.32,1); } .ds-place:hover { transform: translateY(-4px); } .ds-first { background:#80a9ff; } .ds-fourth { background:#496ab8; } .ds-sixth { background:#c6626c; } .ds-eighth { background:#833846; }"
+    },
+    {
+      "name": "Trait Breakpoint",
+      "kind": "custom",
+      "refersTo": "trait-tier",
+      "description": "TFT-native hex for activated trait thresholds only.",
+      "html": "<div class=\"ds-trait\"><span class=\"ds-hex\">4</span><strong>Brawler</strong><span>62% Top 4</span></div>",
+      "css": ".ds-trait { display:grid; grid-template-columns:46px 1fr auto; align-items:center; gap:14px; min-height:70px; border-top:1px solid rgba(197,211,228,.15); color:#f3f0e9; font-family:Outfit,sans-serif; } .ds-hex { display:grid; width:42px; height:46px; place-items:center; clip-path:polygon(50% 0,93% 24%,93% 76%,50% 100%,7% 76%,7% 24%); background:#d6ae55; color:#16130b; font-weight:750; } .ds-trait > span:last-child { color:#9ba8b8; font-size:12px; }"
+    },
+    {
+      "name": "Repeated Comp Card",
+      "kind": "card",
+      "refersTo": "analysis-panel",
+      "description": "The sole recurring card shell, reserved for repeated composition records.",
+      "html": "<article class=\"ds-comp\"><strong>Comp name</strong><div class=\"ds-comp-stats\"><span>12 games</span><span>3.8 avg</span><span>58% Top 4</span></div></article>",
+      "css": ".ds-comp { border:1px solid rgba(197,211,228,.15); border-radius:6px; background:#101925; color:#f3f0e9; font:400 15px Outfit,sans-serif; padding:20px; transition:transform 170ms cubic-bezier(.23,1,.32,1), background-color 170ms ease; } .ds-comp:hover { background:#182333; transform:translateY(-2px); } .ds-comp:focus-within { outline:3px solid rgba(136,115,238,.2); } .ds-comp-stats { display:flex; gap:16px; margin-top:16px; border-top:1px solid rgba(197,211,228,.15); padding-top:12px; color:#9ba8b8; font-size:12px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Matchroom Ledger",
+    "overview": "TFT Tracker is a post-game review desk: part tournament broadcast, part analyst notebook, and part polished desktop application. It is built for repeated personal analysis, so expression comes from composition, typography, and game-specific data language rather than decorative chrome. The system alternates dense ruled analysis fields with one decisive mineral-paper ledger surface. Key performance numbers stand in open space. Repeated cards are reserved for repeated objects such as comps; the page itself is organized as connected editorial bands.",
+    "keyCharacteristics": [
+      "An asymmetric player masthead with the tactician integrated into identity.",
+      "A mineral-paper twenty-game ledger as the signature first-viewport surface.",
+      "Open, tabular performance numerals without nested metric cards.",
+      "Flat ink surfaces divided by precise rules instead of glow or broad shadow.",
+      "Blue placements for first through fourth and red placements for fifth through eighth.",
+      "Fast, interruptible interaction feedback with a reduced-motion equivalent."
+    ],
+    "rules": [
+      {
+        "name": "The Identity/Data Split Rule",
+        "body": "Violet identifies the product and current selection. Cobalt, stepped blues, and stepped reds encode player data.",
+        "section": "colors"
+      },
+      {
+        "name": "The Paper Is Earned Rule",
+        "body": "Mineral paper appears only where the interface changes reading mode: the match ledger, the insight lead, and onboarding.",
+        "section": "colors"
+      },
+      {
+        "name": "The Honest State Rule",
+        "body": "Cached data, unavailable sources, validation errors, and empty results remain visible and plainly written.",
+        "section": "colors"
+      },
+      {
+        "name": "The Numeral Authority Rule",
+        "body": "Primary statistics are large, tabular, and left aligned. Their labels explain them without competing for attention.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Edge Rule",
+        "body": "A surface may use a divider or a border, never a border plus a broad shadow.",
+        "section": "elevation"
+      },
+      {
+        "name": "The No Glow Rule",
+        "body": "Colored halos, chromatic shadows, shiny accents, and blurred atmosphere do not belong in the application.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use editorial bands and rules to organize primary analysis.",
+      "Do let important performance numerals occupy open space.",
+      "Do reserve mineral paper for meaningful changes in reading mode.",
+      "Do preserve exact blue and red placement semantics across views.",
+      "Do keep controls native, compact, keyboard accessible, and visibly focused.",
+      "Do use 140-220ms motion for state, orientation, and feedback.",
+      "Do label cached, unavailable, and incomplete data honestly."
+    ],
+    "donts": [
+      "Don't rebuild the page as a uniform grid of rounded cards.",
+      "Don't use glow, glossy gradients, glass, purple atmosphere, or shiny borders.",
+      "Don't turn metadata, tags, or scope values into clouds of pills.",
+      "Don't use gaming fonts, neon cyberpunk styling, or Discord-bot visual language.",
+      "Don't use hexagons outside trait and board-specific contexts.",
+      "Don't add ambient motion, decorative floating, or long page transitions.",
+      "Don't invent recommendations, global comparisons, or statistics the data does not provide."
+    ]
+  }
+}

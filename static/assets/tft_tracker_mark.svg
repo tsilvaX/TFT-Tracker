@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 78" role="img" aria-label="TFT Tracker mark">
+  <g fill="none" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M15 9h35l13 13v34L50 69H15L7 61V17l8-8Z" stroke="#F3F0E9" stroke-width="2"/>
+    <path d="M15 9h35l13 13" stroke="#8873EE" stroke-width="5"/>
+    <path d="M17 50 29 40l10 6 16-20" stroke="#8873EE" stroke-width="5"/>
+    <path d="m50 26 7-1-2 7" stroke="#8873EE" stroke-width="4"/>
+    <path d="M20 22h27M33.5 22v13" stroke="#F3F0E9" stroke-width="5"/>
+  </g>
+</svg>
